@@ -10,6 +10,72 @@ const TableComponent = () => {
     const { query } = useParams();
     const [selectedTable, setSelectedTable] = useState(null);
     const [output, setOutput] = useState([]);
+    const [favorites, setFavorites] = useState([]);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [token, setToken] = useState('');
+
+    useEffect(() => {
+        // Check if user is logged in and retrieve token from localStorage
+        const storedToken = localStorage.getItem('authToken');
+        if (storedToken) {
+            setToken(storedToken);
+        }
+    }, []);
+
+    const addToFavorites = () => {
+        if (selectedTable) {
+            if (!isFavorite) {
+                // Call API to add item to favorites
+                fetch('http://localhost:8084/wish/addItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ${token}', // Replace with your actual token
+                    },
+                    body: JSON.stringify(selectedTable), // Assuming selectedTable contains necessary data
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to add item to favorites');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        setFavorites([...favorites, selectedTable]);
+                        setIsFavorite(true);
+                    })
+                    .catch(error => {
+                        console.error('Error adding item to favorites:', error);
+                    });
+            }
+        }
+    };
+
+    const removeFromFavorites = () => {
+        if (selectedTable) {
+            // Assuming nix_item_id is available in selectedTable
+            fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTable.nix_item_id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: 'Bearer ${token}', // Replace with your actual token
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to remove item from favorites');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    const updatedFavorites = favorites.filter(item => item !== selectedTable);
+                    setFavorites(updatedFavorites);
+                    setIsFavorite(false);
+                })
+                .catch(error => {
+                    console.error('Error removing item from favorites:', error);
+                });
+        }
+    };
 
     const renderValue = (value) => {
         if (Array.isArray(value)) {
@@ -49,6 +115,10 @@ const TableComponent = () => {
     }, [query]);
 
 
+    useEffect(() => {
+        setIsFavorite(favorites.includes(selectedTable));
+    }, [favorites, selectedTable]);
+
     const renderSelectedTable = () => {
         if (!selectedTable) {
             return null;
@@ -59,7 +129,7 @@ const TableComponent = () => {
         )[0];
 
         return (
-            <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '10px', position: 'relative', textAlign: 'center' }}>
+            <div style={{ maxHeight: '500px', overflowY: 'auto', paddingBottom: '10px', position: 'relative', textAlign: 'center' }}>
                 <h3 style={{
                     position: 'sticky',
                     top: '0',
@@ -67,9 +137,12 @@ const TableComponent = () => {
                     textAlign: 'center'
                 }}>
                     Selected Item: {selectedTable}
+                    <button onClick={addToFavorites} style={{ margin: '10px' }}>
+                        {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
+                    </button>
                 </h3>
                 <table border="1" cellSpacing="0" style={{ marginTop: '30px', margin: 'auto' }}>
-                    <thead>
+                    <thead >
                         <tr>
                             <th style={{ width: '300px', height: '40px' }}>Nutrients</th>
                             <th style={{ width: '300px', height: '40px' }}>Value</th>
@@ -84,6 +157,14 @@ const TableComponent = () => {
                         ))}
                     </tbody>
                 </table>
+                <button onClick={addToFavorites} 
+                    style={{ 
+                        margin: '10px',
+                        color: isFavorite ? 'red' : 'green',
+                        fontWeight: 'bold',
+                         }}>
+                    {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
+                </button>
             </div>
         );
     };
