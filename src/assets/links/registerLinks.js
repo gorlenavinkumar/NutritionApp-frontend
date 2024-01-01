@@ -1,0 +1,1 @@
+export const registerLinks = [{path: "/register", text: "Register"}];
