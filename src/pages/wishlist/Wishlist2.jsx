@@ -77,7 +77,15 @@ const Wishlist = () => {
 
 return (
   <div>
-    <h2>Wishlist</h2>
+    <h2 style={{
+        position: 'sticky',
+        top: '0',
+        backgroundColor: 'white',
+        textAlign: 'center'
+      }}
+    >
+      Wishlist
+    </h2>
     <div>
       <Grid container spacing={2}>
         {wishlistItems && wishlistItems.length > 0 ? (

@@ -1,6 +1,10 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 const REGISTER_URL = "http://localhost:8081/userProfile/register"; // Replace with your actual registration endpoint
 
-export const registerUser = async (userData) => {
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
+  async (userData) => {
   try {
     const response = await fetch(REGISTER_URL, {
       method: "POST",
@@ -9,7 +13,7 @@ export const registerUser = async (userData) => {
       },
       body: JSON.stringify(userData), // Data to be sent to the server
     });
-    console.log(response);
+    console.log("Inside registerSlice", response);
 
     if (!response.ok) {
       throw new Error("Registration failed");
@@ -19,6 +23,6 @@ export const registerUser = async (userData) => {
   } catch (error) {
     throw new Error(error.message);
   }
-};
+});
 
 

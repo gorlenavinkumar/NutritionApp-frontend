@@ -51,15 +51,17 @@ const TableComponent = () => {
                         .catch(error => {
                             console.error('Error adding item to favorites:', error);
                         });
-                    }
                 }
             }
-        };
+        }
+    };
 
-        const removeFromFavorites = () => {
-            if (selectedTable) {
-                // Assuming nix_item_id is available in selectedTable
-                fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTable.nix_item_id}`, {
+    const removeFromFavorites = () => {
+        if (selectedTable) {
+            // Assuming nix_item_id is available in selectedTable
+            const selectedTableData = output.find(item => item.nix_item_name === selectedTable);
+            if (selectedTableData) {
+                fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTableData.nix_item_id}`, {
                     method: 'DELETE',
                     headers: {
                         Authorization: token, // Login token
@@ -79,7 +81,7 @@ const TableComponent = () => {
                     .catch(error => {
                         console.error('Error removing item from favorites:', error);
                     });
-            }
+            }}
         };
 
         const renderValue = (value) => {
@@ -142,7 +144,7 @@ const TableComponent = () => {
                         textAlign: 'center'
                     }}>
                         Selected Item: {selectedTable}
-                        <button onClick={addToFavorites}
+                        <button onClick={isFavorite ? removeFromFavorites : addToFavorites}
                             style={{
                                 margin: '10px',
                                 color: isFavorite ? 'red' : 'green',

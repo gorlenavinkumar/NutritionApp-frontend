@@ -1,0 +1,25 @@
+/* ItemDetails.css */
+.item-details-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Set a height to center vertically */
+  }
+  
+  .item-details-content {
+    text-align: center;
+  }
+  
+  .item-details-table {
+    border-collapse: collapse;
+    width: 70%; /* Adjust the width as needed */
+    border: 1px solid #000; /* Add borders to the table */
+    margin-top: 20px; /* Adjust margin as needed */
+  }
+  
+  .item-details-table th,
+  .item-details-table td {
+    border: 1px solid #000; /* Add borders to table cells */
+    padding: 8px;
+  }
+  
