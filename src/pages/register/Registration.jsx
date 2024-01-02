@@ -9,6 +9,10 @@ export default function Register(props) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
+  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const initialFormValues = {
     username: "",
     password: "",
@@ -28,6 +32,36 @@ export default function Register(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation checks before dispatching the registration
+    if (!usernameRegex.test(formValues.username)) {
+      setSnackbarProps({
+        open: true,
+        msg: "Username must be alphanumeric and between 3-20 characters",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!passwordRegex.test(formValues.password)) {
+      setSnackbarProps({
+        open: true,
+        msg:
+          "Password must contain at least 8 characters with at least one uppercase letter, one lowercase letter, and one number",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!emailRegex.test(formValues.email)) {
+      setSnackbarProps({
+        open: true,
+        msg: "Please enter a valid email address",
+        severity: "error",
+      });
+      return;
+    }
+
     await dispatch(registerUser(formValues))
       .unwrap()
       .then(() => {

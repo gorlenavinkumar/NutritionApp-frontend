@@ -81,100 +81,116 @@ const TableComponent = () => {
                     .catch(error => {
                         console.error('Error removing item from favorites:', error);
                     });
-            }}
-        };
-
-        const renderValue = (value) => {
-            if (Array.isArray(value)) {
-                return (
-                    <ul>
-                        {value.map((item, index) => (
-                            <li key={index}>{item}</li>
-                        ))}
-                    </ul>
-                );
             }
-            return value.toString();
-        };
+        }
+    };
 
-        const handleSelectTable = (event) => {
-            const selectedTableName = event.target.value;
-            setSelectedTable(selectedTableName);
-        };
-
-        useEffect(() => {
-            fetch(`http://localhost:8083/nutrition/search?query=${query}`)
-                .then((response) => {
-                    console.log(response);
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok: ${response.status}`');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (Array.isArray(data)) {
-                        setOutput(data);
-                    } else {
-                        throw new Error('Data is not an array');
-                    }
-                })
-                .catch((error) => console.error('Error fetching or processing data:', error));
-        }, [query]);
-
-
-        useEffect(() => {
-            setIsFavorite(favorites.includes(selectedTable));
-        }, [favorites, selectedTable]);
-
-        const renderSelectedTable = () => {
-            if (!selectedTable) {
-                return null;
-            }
-
-            const selectedTableData = output.filter(
-                (object) => object.nix_item_name === selectedTable
-            )[0];
-
+    const renderValue = (value) => {
+        if (Array.isArray(value)) {
             return (
-                <div style={{ maxHeight: '500px', overflowY: 'auto', paddingBottom: '10px', position: 'relative', textAlign: 'center' }}>
-                    <h3 style={{
-                        position: 'sticky',
-                        top: '0',
-                        backgroundColor: 'white',
-                        textAlign: 'center'
-                    }}>
-                        Selected Item: {selectedTable}
-                        <button onClick={isFavorite ? removeFromFavorites : addToFavorites}
-                            style={{
-                                margin: '10px',
-                                color: isFavorite ? 'red' : 'green',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
-                        </button>
-                    </h3>
-                    <table border="1" cellSpacing="0" style={{ marginTop: '30px', margin: 'auto' }}>
-                        <thead >
-                            <tr>
-                                <th style={{ width: '300px', height: '40px' }}>Nutrients</th>
-                                <th style={{ width: '300px', height: '40px' }}>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(selectedTableData).map(([key, value], index) => (
-                                <tr key={index}>
-                                    <td style={{ width: '200px', height: '40px' }}>{key}</td>
-                                    <td style={{ width: '200px', height: '40px' }}>{renderValue(value)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <ul>
+                    {value.map((item, index) => (
+                        <li key={index}>{item}</li>
+                    ))}
+                </ul>
             );
-        };
+        }
+        return value.toString();
+    };
+
+    const handleSelectTable = (event) => {
+        const selectedTableName = event.target.value;
+        setSelectedTable(selectedTableName);
+    };
+
+    useEffect(() => {
+        fetch(`http://localhost:8083/nutrition/search?query=${query}`)
+            .then((response) => {
+                console.log(response);
+                if (!response.ok) {
+                    alert("Enter the valid food item !!");
+                    throw new Error('Network response was not ok: ${response.status}`');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setOutput(data);
+                } else {
+                    throw new Error('Data is not an array');
+                }
+            })
+            .catch((error) => console.error('Error fetching or processing data:', error));
+    }, [query]);
+
+
+    useEffect(() => {
+        setIsFavorite(favorites.includes(selectedTable));
+    }, [favorites, selectedTable]);
+
+    const renderSelectedTable = () => {
+        if (!selectedTable) {
+            return null;
+        }
+
+        const selectedTableData = output.filter(
+            (object) => object.nix_item_name === selectedTable
+        )[0];
 
         return (
+            <div
+                style={{
+                    maxHeight: '500px',
+                    overflowY: 'auto',
+                    paddingBottom: '10px',
+                    position: 'relative',
+                    textAlign: 'center',
+                    backgroundImage: `url('https://img.freepik.com/free-photo/fresh-colourful-ingredients-mexican-cuisine_23-2148254294.jpg')`,
+                    backgroundSize: 'cover',
+                }}>
+                <h3 style={{
+                    position: 'sticky',
+                    top: '0',
+                    backgroundColor: 'white',
+                    textAlign: 'center'
+                }}>
+                    Selected Item: {selectedTable}
+                    <button onClick={isFavorite ? removeFromFavorites : addToFavorites}
+                        style={{
+                            margin: '10px',
+                            color: isFavorite ? 'red' : 'green',
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
+                    </button>
+                </h3>
+                <table border="1" cellSpacing="0" style={{ marginTop: '30px', margin: 'auto' }}>
+                    <thead >
+                        <tr>
+                            <th style={{ width: '300px', height: '40px' }}>Nutrients</th>
+                            <th style={{ width: '300px', height: '40px' }}>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(selectedTableData).map(([key, value], index) => (
+                            <tr key={index}>
+                                <td style={{ width: '200px', height: '40px' }}>{key}</td>
+                                <td style={{ width: '200px', height: '40px' }}>{renderValue(value)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
+    return (
+        <div
+            style={{
+                backgroundImage: `url('https://img.freepik.com/free-photo/fresh-colourful-ingredients-mexican-cuisine_23-2148254294.jpg')`,
+                backgroundSize: 'cover',
+            }}>
             <div style={{
 
                 textAlign: 'center'
@@ -191,8 +207,9 @@ const TableComponent = () => {
                 </select>
                 {renderSelectedTable()}
             </div>
-        );
-    };
+        </div>
+    );
+};
 
 
-    export default TableComponent;
+export default TableComponent;
