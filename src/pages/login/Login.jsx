@@ -43,6 +43,7 @@ export default function Login(props) {
           msg: "Logged In Successfully",
           severity: "success",
         });
+        navigate('/home');
       })
       .catch(() => {
         setSnackbarProps({

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Box, Paper, TextField, Button, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-import { loginUserAsync } from "../../redux/authSlice";
 import { registerUser } from "../../redux/registerSlice";
 
 export default function Register(props) {
@@ -28,43 +26,27 @@ export default function Register(props) {
     setFormValues(initialFormValues);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     try {
-      const response = await registerUser(formValues).then(()=>{
-      /* .then( () => {
-      setSnackbarProps({
-        open: true,
-        msg: "Registered Successfully",
-        severity: "success",
-      });
-      navigate("/home"); // Redirect to the dashboard upon successful registration
-    }). catch (()=> {
-      setSnackbarProps({
-        open: true,
-        msg: "Registration Failed",
-        severity: "error",
-      });
-    }); */
-      console.log(response);
-      if (response) {
+      const response = await dispatch(registerUser(formValues));
+      
+      if (response.payload && response.payload.ok) {
         setSnackbarProps({
           open: true,
           msg: "Registered Successfully",
           severity: "success",
         });
-        navigate("/Home");
+        navigate("/home");
       } else {
         throw new Error("Registration Failed");
       }
-    });
     } catch (error) {
       setSnackbarProps({
         open: true,
         msg: "Registration Failed",
         severity: "error",
       });
-
     }
   }
 

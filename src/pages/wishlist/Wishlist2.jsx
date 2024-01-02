@@ -24,10 +24,11 @@ const Wishlist = () => {
     // Fetch wishlist items for the logged-in user from the backend
     const fetchWishlist = async () => {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:8084/wish/getUserWishList`, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: token,
           },
         });
   
@@ -48,8 +49,14 @@ const Wishlist = () => {
 
   const handleCardClick = async(itemName) => {
     try {
-      const response = await axios.get(`http://localhost:8084/wish/getUserWishList`);
-      setNewItems(response);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:8084/wish/getUserWishList`,{
+        headers:{
+          Authorization: token,
+        }
+      });
+      console.log(response);
+      setNewItems(response.data);
       {newItems && newItems.length > 0 ? (
         newItems.map((item, index) => {
           if(item.nix_item_name === itemName){

@@ -9,8 +9,9 @@ export const registerUser = async (userData) => {
       },
       body: JSON.stringify(userData), // Data to be sent to the server
     });
+    console.log(response);
 
-    if (!response.created) {
+    if (!response.ok) {
       throw new Error("Registration failed");
     }
 

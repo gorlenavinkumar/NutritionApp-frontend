@@ -1,9 +1,10 @@
 // ItemDetails.jsx
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 const ItemDetails = () => {
-  const { item } = useParams();
+  const location = useLocation();  
+  const { item } = location.state || { };
   console.log("item-details: ",item);
 
   return (

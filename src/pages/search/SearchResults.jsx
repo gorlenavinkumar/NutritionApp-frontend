@@ -16,7 +16,7 @@ const TableComponent = () => {
 
     useEffect(() => {
         // Check if user is logged in and retrieve token from localStorage
-        const storedToken = localStorage.getItem('authToken');
+        const storedToken = localStorage.getItem('token');
         if (storedToken) {
             setToken(storedToken);
         }
@@ -24,170 +24,173 @@ const TableComponent = () => {
 
     const addToFavorites = () => {
         if (selectedTable) {
-            if (!isFavorite) {
-                // Call API to add item to favorites
-                fetch('http://localhost:8084/wish/addItem', {
-                    method: 'POST',
+            // Find the corresponding data in 'output' based on 'selectedTable' name
+            const selectedTableData = output.find(item => item.nix_item_name === selectedTable);
+            if (selectedTableData) {
+                console.log("Selected table: ", selectedTableData)
+                if (!isFavorite) {
+                    // Call API to add item to favorites
+                    fetch('http://localhost:8084/wish/addItem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: token, // Login token
+                        },
+                        body: JSON.stringify(selectedTableData), // Assuming selectedTable contains necessary data
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to add item to favorites');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            setFavorites([...favorites, selectedTable]);
+                            setIsFavorite(true);
+                        })
+                        .catch(error => {
+                            console.error('Error adding item to favorites:', error);
+                        });
+                    }
+                }
+            }
+        };
+
+        const removeFromFavorites = () => {
+            if (selectedTable) {
+                // Assuming nix_item_id is available in selectedTable
+                fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTable.nix_item_id}`, {
+                    method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: 'Bearer ${token}', // Replace with your actual token
+                        Authorization: token, // Login token
                     },
-                    body: JSON.stringify(selectedTable), // Assuming selectedTable contains necessary data
                 })
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('Failed to add item to favorites');
+                            throw new Error('Failed to remove item from favorites');
                         }
                         return response.json();
                     })
-                    .then(data => {
-                        setFavorites([...favorites, selectedTable]);
-                        setIsFavorite(true);
+                    .then(() => {
+                        const updatedFavorites = favorites.filter(item => item !== selectedTable);
+                        setFavorites(updatedFavorites);
+                        setIsFavorite(false);
                     })
                     .catch(error => {
-                        console.error('Error adding item to favorites:', error);
+                        console.error('Error removing item from favorites:', error);
                     });
             }
-        }
-    };
+        };
 
-    const removeFromFavorites = () => {
-        if (selectedTable) {
-            // Assuming nix_item_id is available in selectedTable
-            fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTable.nix_item_id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: 'Bearer ${token}', // Replace with your actual token
-                },
-            })
-                .then(response => {
+        const renderValue = (value) => {
+            if (Array.isArray(value)) {
+                return (
+                    <ul>
+                        {value.map((item, index) => (
+                            <li key={index}>{item}</li>
+                        ))}
+                    </ul>
+                );
+            }
+            return value.toString();
+        };
+
+        const handleSelectTable = (event) => {
+            const selectedTableName = event.target.value;
+            setSelectedTable(selectedTableName);
+        };
+
+        useEffect(() => {
+            fetch(`http://localhost:8083/nutrition/search?query=${query}`)
+                .then((response) => {
+                    console.log(response);
                     if (!response.ok) {
-                        throw new Error('Failed to remove item from favorites');
+                        throw new Error('Network response was not ok: ${response.status}`');
                     }
                     return response.json();
                 })
-                .then(() => {
-                    const updatedFavorites = favorites.filter(item => item !== selectedTable);
-                    setFavorites(updatedFavorites);
-                    setIsFavorite(false);
+                .then((data) => {
+                    if (Array.isArray(data)) {
+                        setOutput(data);
+                    } else {
+                        throw new Error('Data is not an array');
+                    }
                 })
-                .catch(error => {
-                    console.error('Error removing item from favorites:', error);
-                });
-        }
-    };
+                .catch((error) => console.error('Error fetching or processing data:', error));
+        }, [query]);
 
-    const renderValue = (value) => {
-        if (Array.isArray(value)) {
+
+        useEffect(() => {
+            setIsFavorite(favorites.includes(selectedTable));
+        }, [favorites, selectedTable]);
+
+        const renderSelectedTable = () => {
+            if (!selectedTable) {
+                return null;
+            }
+
+            const selectedTableData = output.filter(
+                (object) => object.nix_item_name === selectedTable
+            )[0];
+
             return (
-                <ul>
-                    {value.map((item, index) => (
-                        <li key={index}>{item}</li>
-                    ))}
-                </ul>
+                <div style={{ maxHeight: '500px', overflowY: 'auto', paddingBottom: '10px', position: 'relative', textAlign: 'center' }}>
+                    <h3 style={{
+                        position: 'sticky',
+                        top: '0',
+                        backgroundColor: 'white',
+                        textAlign: 'center'
+                    }}>
+                        Selected Item: {selectedTable}
+                        <button onClick={addToFavorites}
+                            style={{
+                                margin: '10px',
+                                color: isFavorite ? 'red' : 'green',
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
+                        </button>
+                    </h3>
+                    <table border="1" cellSpacing="0" style={{ marginTop: '30px', margin: 'auto' }}>
+                        <thead >
+                            <tr>
+                                <th style={{ width: '300px', height: '40px' }}>Nutrients</th>
+                                <th style={{ width: '300px', height: '40px' }}>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(selectedTableData).map(([key, value], index) => (
+                                <tr key={index}>
+                                    <td style={{ width: '200px', height: '40px' }}>{key}</td>
+                                    <td style={{ width: '200px', height: '40px' }}>{renderValue(value)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             );
-        }
-        return value.toString();
-    };
-
-    const handleSelectTable = (event) => {
-        const selectedTableName = event.target.value;
-        setSelectedTable(selectedTableName);
-    };
-
-    useEffect(() => {
-        fetch(`http://localhost:8083/nutrition/search?query=${query}`)
-            .then((response) => {
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ${response.status}`');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (Array.isArray(data)) {
-                    setOutput(data);
-                } else {
-                    throw new Error('Data is not an array');
-                }
-            })
-            .catch((error) => console.error('Error fetching or processing data:', error));
-    }, [query]);
-
-
-    useEffect(() => {
-        setIsFavorite(favorites.includes(selectedTable));
-    }, [favorites, selectedTable]);
-
-    const renderSelectedTable = () => {
-        if (!selectedTable) {
-            return null;
-        }
-
-        const selectedTableData = output.filter(
-            (object) => object.nix_item_name === selectedTable
-        )[0];
+        };
 
         return (
-            <div style={{ maxHeight: '500px', overflowY: 'auto', paddingBottom: '10px', position: 'relative', textAlign: 'center' }}>
-                <h3 style={{
-                    position: 'sticky',
-                    top: '0',
-                    backgroundColor: 'white',
-                    textAlign: 'center'
-                }}>
-                    Selected Item: {selectedTable}
-                    <button onClick={addToFavorites} style={{ margin: '10px' }}>
-                        {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
-                    </button>
-                </h3>
-                <table border="1" cellSpacing="0" style={{ marginTop: '30px', margin: 'auto' }}>
-                    <thead >
-                        <tr>
-                            <th style={{ width: '300px', height: '40px' }}>Nutrients</th>
-                            <th style={{ width: '300px', height: '40px' }}>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Object.entries(selectedTableData).map(([key, value], index) => (
-                            <tr key={index}>
-                                <td style={{ width: '200px', height: '40px' }}>{key}</td>
-                                <td style={{ width: '200px', height: '40px' }}>{renderValue(value)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <button onClick={addToFavorites} 
-                    style={{ 
-                        margin: '10px',
-                        color: isFavorite ? 'red' : 'green',
-                        fontWeight: 'bold',
-                         }}>
-                    {isFavorite ? "Delete from Favorites" : "Add to Favorites"}
-                </button>
+            <div style={{
+
+                textAlign: 'center'
+            }}>
+                <h2>Select your Food Item</h2>
+                {/* <label htmlFor="tablesDropdown">Select your Food Item</label> */}
+                <select id="tablesDropdown" onChange={handleSelectTable} style={{ margin: '5px' }}>
+                    <option value="">Select your Food Item</option>
+                    {Array.isArray(output) && output.map((object, index) => (
+                        <option key={index} value={object.nix_item_name}>
+                            {object.nix_item_name}
+                        </option>
+                    ))}
+                </select>
+                {renderSelectedTable()}
             </div>
         );
     };
 
-    return (
-        <div style={{
 
-            textAlign: 'center'
-        }}>
-            <h2>Select your Food Item</h2>
-            {/* <label htmlFor="tablesDropdown">Select your Food Item</label> */}
-            <select id="tablesDropdown" onChange={handleSelectTable} style={{ margin: '5px' }}>
-                <option value="">Select your Food Item</option>
-                {Array.isArray(output) && output.map((object, index) => (
-                    <option key={index} value={object.nix_item_name}>
-                        {object.nix_item_name}
-                    </option>
-                ))}
-            </select>
-            {renderSelectedTable()}
-        </div>
-    );
-};
-
-
-export default TableComponent;
+    export default TableComponent;
