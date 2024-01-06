@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, Paper, Typography, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { TextField, IconButton } from "@mui/material";
@@ -116,26 +116,20 @@ export default function Home() {
           justifyContent: "space-evenly",
         }}
       >
-        {cardContent.map((content, idx) => (
-          <Paper
-            key={idx}
-            elevation={5}
-            sx={{
-              width: "20%",
-              height: "90%",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Box
-              sx={{
-                mx: 2,
-                height: "50%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
+        <Grid container spacing={2} justifyContent="space-evenly">
+          {cardContent.map((content, idx) => (
+            <Grid key={idx} item xs={12} sm={6} md={3}>
+              <Paper elevation={5} sx={{ height: "100%" }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    textAlign: "center",
+                  }}
+                >
               <Typography variant="h6" sx={{ color: "primary.dark" }}>
                 {content.title}
               </Typography>
@@ -144,7 +138,9 @@ export default function Home() {
               </Typography>
             </Box>
           </Paper>
-        ))}
+          </Grid>
+          ))}
+        </Grid>
       </Box>
     </Container>
   );

@@ -89,23 +89,26 @@ const Wishlist = () => {
     }
   };
 
-  const handleDeleteItemClick = (e, itemName) => {
-    const selectedTableData = output.find(item => item.nix_item_name === itemName);
-    if (selectedTableData) {
-      fetch(`http://localhost:8084/wish/deleteUserProduct/${selectedTableData.nix_item_id}`, {
+  const handleDeleteItemClick = (e, itemId) => {
+    console.log("ItemName: ", itemId);
+    const selectedTableData = output.find(item => item.nix_item_id === itemId);
+    console.log("Selected Data: ", selectedTableData);
+    if (itemId) {
+      fetch(`http://localhost:8084/wish/deleteUserProduct/${itemId}`, {
         method: 'DELETE',
         headers: {
           Authorization: token, // Login token
         },
       })
         .then(response => {
+          console.log("Delete Response: ",response );
           if (!response.ok) {
             throw new Error('Failed to remove item from favorites');
           }
           return response.json();
         })
         .then(() => {
-          const updatedFavorites = favorites.filter(item => item !== itemName);
+          const updatedFavorites = favorites.filter(item => item !== itemId);
           setFavorites(updatedFavorites);
           setIsFavorite(false);
         })
@@ -152,7 +155,7 @@ const Wishlist = () => {
                           cursor: 'pointer',
 
                         }}
-                        onClick={(e) => handleDeleteItemClick(e, item.nix_item_name)}
+                        onClick={(e) => handleDeleteItemClick(e, item.nix_item_id)}
                       >
                         Delete
                       </button>
