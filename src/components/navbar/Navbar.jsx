@@ -16,6 +16,10 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { loggedInLinks, loggedOutLinks } from "../../assets/links/navLinks";
 import { logOut } from "../../redux/authSlice";
+import HomeIcon from '@mui/icons-material/Home';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PersonIcon from '@mui/icons-material/Person';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -121,7 +125,7 @@ export default function Navbar() {
             </Typography>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {links.map((link, idx) => (
-                <Button
+                <IconButton
                   key={idx}
                   onClick={() => {
                     if (link.text === "Log Out") {
@@ -131,8 +135,31 @@ export default function Navbar() {
                   }}
                   sx={{ my: 2, color: "white", display: "block" }}
                 >
-                  {link.text}
-                </Button>
+                  {link.text === 'Home' && (
+                    <>
+                      <HomeIcon />
+                      <Typography sx={{ ml: 1 }}>{link.text}</Typography>
+                    </>
+                  )}
+                  {link.text === 'Wishlist' && (
+                    <>
+                      <FavoriteIcon />
+                      <Typography sx={{ ml: 1 }}>{link.text}</Typography>
+                    </>
+                  )}
+                  {link.text === 'Login' && (
+                    <>
+                      <PersonIcon />
+                      <Typography sx={{ ml: 1 }}>{link.text}</Typography>
+                    </>
+                  )}
+                  {link.text === 'Log Out' && (
+                    <>
+                      <ExitToAppIcon />
+                      <Typography sx={{ ml: 1 }}>{link.text}</Typography>
+                    </>
+                  )}
+                </IconButton>
               ))}
             </Box>
           </Box>
